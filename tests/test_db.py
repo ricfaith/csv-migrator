@@ -1,11 +1,14 @@
+import sys
 from unittest.mock import MagicMock
 
+from csv_migrator.config import Config
 from csv_migrator.db import (
     quote_identifier,
     create_table,
     load_rows,
     summary_report,
     escape_odbc_value,
+    connect,
 )
 
 
@@ -66,3 +69,23 @@ def test_escape_odbc_value_wraps_and_doubles_braces():
     assert escape_odbc_value("simple") == "{simple}"
     assert escape_odbc_value("has;semi") == "{has;semi}"
     assert escape_odbc_value("has}brace") == "{has}}brace}"
+
+
+def test_connect_builds_escaped_connection_string(monkeypatch):
+    fake_pyodbc = MagicMock()
+    monkeypatch.setitem(sys.modules, "pyodbc", fake_pyodbc)
+
+    config = Config(
+        csv_folder="/data",
+        sql_server="host;withsemicolon",
+        sql_database="db",
+        sql_schema="dbo",
+        sql_user="user",
+        sql_password="p@ss}word",
+    )
+
+    connect(config)
+
+    conn_str = fake_pyodbc.connect.call_args.args[0]
+    assert "{host;withsemicolon}" in conn_str
+    assert "{p@ss}}word}" in conn_str

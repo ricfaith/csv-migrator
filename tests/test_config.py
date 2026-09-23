@@ -42,6 +42,13 @@ def test_parse_env_file_strips_surrounding_quotes(tmp_path):
     assert values == {"CSV_FOLDER": "/path/with spaces"}
 
 
+def test_parse_env_file_quoted_value_containing_hash_is_not_truncated(tmp_path):
+    env_path = tmp_path / "migrate.env"
+    env_path.write_text('SQL_PASSWORD="p@ss #1"\n')
+    values = parse_env_file(str(env_path))
+    assert values == {"SQL_PASSWORD": "p@ss #1"}
+
+
 def test_parse_env_file_handles_utf8_bom(tmp_path):
     env_path = tmp_path / "migrate.env"
     env_path.write_bytes("﻿CSV_FOLDER=/data\n".encode("utf-8"))

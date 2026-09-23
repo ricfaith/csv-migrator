@@ -63,6 +63,7 @@ def test_run_continues_after_one_file_fails(tmp_path, caplog, monkeypatch):
 
     assert "Succeeded: 1" in caplog.text
     assert "Failed: 1" in caplog.text
+    assert conn.rollback.call_count == 1
 
 
 def test_run_skips_file_with_colliding_table_name(tmp_path, caplog, monkeypatch):

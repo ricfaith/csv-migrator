@@ -35,10 +35,15 @@ def parse_env_file(path: str) -> dict:
             key, _, value = line.partition("=")
             key = key.strip()
             value = value.strip()
-            if " #" in value:
+            if value and value[0] in ("'", '"'):
+                quote = value[0]
+                end = value.find(quote, 1)
+                if end != -1:
+                    value = value[1:end]
+                else:
+                    value = value[1:]
+            elif " #" in value:
                 value = value.split(" #", 1)[0].rstrip()
-            if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
-                value = value[1:-1]
             values[key] = value
     return values
 
