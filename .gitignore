@@ -1,0 +1,4 @@
+.DS_Store
+migrate.env
+__pycache__/
+*.pyc

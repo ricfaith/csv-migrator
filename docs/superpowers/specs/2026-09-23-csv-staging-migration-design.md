@@ -64,10 +64,10 @@ SQL_PASSWORD=          # prefer leaving blank; set via env var or prompt instead
 
 ## Architecture
 
-Single script: `migrate_csv_to_staging.py`.
+Single script: `migrate_csv.py`.
 
 ```
-python migrate_csv_to_staging.py [--env-file migrate.env] [--folder ...] [--server ...] ...
+python migrate_csv.py [--env-file migrate.env] [--folder ...] [--server ...] ...
 ```
 
 Connects to SQL Server via `pyodbc` using SQL Server authentication
