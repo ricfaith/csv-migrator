@@ -1,4 +1,8 @@
 .DS_Store
-migrate.env
 __pycache__/
 *.pyc
+.pytest_cache
+venv
+.env
+migrate.env
+docs/superpowers
