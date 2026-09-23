@@ -1,6 +1,12 @@
 from unittest.mock import MagicMock
 
-from csv_migrator.db import quote_identifier, create_table, load_rows, summary_report
+from csv_migrator.db import (
+    quote_identifier,
+    create_table,
+    load_rows,
+    summary_report,
+    escape_odbc_value,
+)
 
 
 def test_quote_identifier_wraps_and_escapes_brackets():
@@ -20,6 +26,14 @@ def test_create_table_drops_then_creates():
     assert "[dbo].[MyTable]" in drop_sql
     assert create_sql == "CREATE TABLE [dbo].[MyTable] ([Col_A] NVARCHAR(MAX), [Col_B] NVARCHAR(MAX))"
     conn.commit.assert_called_once()
+
+
+def test_create_table_handles_special_characters_in_table_name():
+    conn = MagicMock()
+    cursor = conn.cursor.return_value
+    create_table(conn, "dbo", "O'Brien_Orders", ["Col_A"])
+    drop_sql = cursor.execute.call_args_list[0].args[0]
+    assert drop_sql == "DROP TABLE IF EXISTS [dbo].[O'Brien_Orders]"
 
 
 def test_load_rows_batches_and_returns_total_count():
@@ -46,3 +60,9 @@ def test_summary_report_returns_table_and_row_count_pairs():
     args, _ = cursor.execute.call_args
     assert "sys.tables" in args[0]
     assert args[1] == "dbo"
+
+
+def test_escape_odbc_value_wraps_and_doubles_braces():
+    assert escape_odbc_value("simple") == "{simple}"
+    assert escape_odbc_value("has;semi") == "{has;semi}"
+    assert escape_odbc_value("has}brace") == "{has}}brace}"

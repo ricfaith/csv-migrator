@@ -1,5 +1,8 @@
 import csv
 import logging
+import sys
+
+csv.field_size_limit(sys.maxsize)
 
 logger = logging.getLogger(__name__)
 
@@ -7,7 +10,7 @@ logger = logging.getLogger(__name__)
 def open_csv_reader(path):
     try:
         f = open(path, "r", encoding="utf-8-sig", newline="")
-        f.read()
+        f.read(65536)
         f.seek(0)
     except UnicodeDecodeError:
         f.close()

@@ -63,3 +63,30 @@ def test_run_continues_after_one_file_fails(tmp_path, caplog, monkeypatch):
 
     assert "Succeeded: 1" in caplog.text
     assert "Failed: 1" in caplog.text
+
+
+def test_run_skips_file_with_colliding_table_name(tmp_path, caplog, monkeypatch):
+    (tmp_path / "foo-bar.csv").write_text("X,Y\n1,2\n")
+    (tmp_path / "foo_bar.csv").write_text("X,Y\n3,4\n")
+
+    import migrate_csv
+
+    monkeypatch.setattr(migrate_csv, "create_table", lambda *a, **k: None)
+    monkeypatch.setattr(migrate_csv, "load_rows", lambda *a, **k: 1)
+    monkeypatch.setattr(migrate_csv, "summary_report", lambda *a, **k: [])
+
+    conn = MagicMock()
+    config = Config(
+        csv_folder=str(tmp_path),
+        sql_server="host",
+        sql_database="db",
+        sql_schema="dbo",
+        sql_user="user",
+        sql_password="pw",
+    )
+
+    with caplog.at_level("INFO"):
+        failed = run(config, conn)
+
+    assert failed == 1
+    assert "collides" in caplog.text

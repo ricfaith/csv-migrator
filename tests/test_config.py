@@ -28,6 +28,27 @@ def test_parse_env_file_missing_file_returns_empty_dict(tmp_path):
     assert parse_env_file(str(tmp_path / "nope.env")) == {}
 
 
+def test_parse_env_file_strips_inline_comments(tmp_path):
+    env_path = tmp_path / "migrate.env"
+    env_path.write_text("SQL_SCHEMA=dbo  # default schema\n")
+    values = parse_env_file(str(env_path))
+    assert values == {"SQL_SCHEMA": "dbo"}
+
+
+def test_parse_env_file_strips_surrounding_quotes(tmp_path):
+    env_path = tmp_path / "migrate.env"
+    env_path.write_text('CSV_FOLDER="/path/with spaces"\n')
+    values = parse_env_file(str(env_path))
+    assert values == {"CSV_FOLDER": "/path/with spaces"}
+
+
+def test_parse_env_file_handles_utf8_bom(tmp_path):
+    env_path = tmp_path / "migrate.env"
+    env_path.write_bytes("﻿CSV_FOLDER=/data\n".encode("utf-8"))
+    values = parse_env_file(str(env_path))
+    assert values == {"CSV_FOLDER": "/data"}
+
+
 def test_resolve_value_precedence_cli_wins(monkeypatch):
     _clear_env(monkeypatch)
     monkeypatch.setenv("SQL_SERVER", "env-host")

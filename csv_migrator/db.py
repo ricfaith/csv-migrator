@@ -1,12 +1,16 @@
+def escape_odbc_value(value):
+    return "{" + str(value).replace("}", "}}") + "}"
+
+
 def connect(config):
     import pyodbc
 
     conn_str = (
         "DRIVER={ODBC Driver 18 for SQL Server};"
-        f"SERVER={config.sql_server};"
-        f"DATABASE={config.sql_database};"
-        f"UID={config.sql_user};"
-        f"PWD={config.sql_password};"
+        f"SERVER={escape_odbc_value(config.sql_server)};"
+        f"DATABASE={escape_odbc_value(config.sql_database)};"
+        f"UID={escape_odbc_value(config.sql_user)};"
+        f"PWD={escape_odbc_value(config.sql_password)};"
         "TrustServerCertificate=yes;"
     )
     conn = pyodbc.connect(conn_str)
@@ -21,7 +25,7 @@ def quote_identifier(name):
 def create_table(conn, schema, table, columns):
     cursor = conn.cursor()
     qualified = f"{quote_identifier(schema)}.{quote_identifier(table)}"
-    cursor.execute(f"IF OBJECT_ID('{schema}.{table}', 'U') IS NOT NULL DROP TABLE {qualified}")
+    cursor.execute(f"DROP TABLE IF EXISTS {qualified}")
     column_defs = ", ".join(f"{quote_identifier(c)} NVARCHAR(MAX)" for c in columns)
     cursor.execute(f"CREATE TABLE {qualified} ({column_defs})")
     conn.commit()

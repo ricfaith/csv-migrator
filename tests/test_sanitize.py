@@ -34,3 +34,15 @@ def test_dedupe_headers_sanitizes_each_name():
     assert dedupe_headers(["First Name", "", "First Name"]) == [
         "First_Name", "Column", "First_Name_1",
     ]
+
+
+def test_dedupe_headers_avoids_collision_with_generated_suffix():
+    result = dedupe_headers(["a", "a", "a_1"])
+    lowered = [r.lower() for r in result]
+    assert len(lowered) == len(set(lowered))
+
+
+def test_dedupe_headers_is_case_insensitive():
+    result = dedupe_headers(["Name", "name"])
+    lowered = [r.lower() for r in result]
+    assert len(lowered) == len(set(lowered))

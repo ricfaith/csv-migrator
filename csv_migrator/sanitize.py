@@ -22,13 +22,14 @@ def table_name_from_filename(filename: str) -> str:
 
 def dedupe_headers(headers: list[str]) -> list[str]:
     sanitized = [sanitize_identifier(h) for h in headers]
-    seen: dict[str, int] = {}
+    used_lower = set()
     result = []
     for name in sanitized:
-        if name not in seen:
-            seen[name] = 0
-            result.append(name)
-        else:
-            seen[name] += 1
-            result.append(f"{name}_{seen[name]}")
+        candidate = name
+        counter = 1
+        while candidate.lower() in used_lower:
+            candidate = f"{name}_{counter}"
+            counter += 1
+        used_lower.add(candidate.lower())
+        result.append(candidate)
     return result

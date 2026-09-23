@@ -34,15 +34,26 @@ def run(config, conn):
     csv_files = discover_csv_files(config.csv_folder)
     if not csv_files:
         logger.info("No CSV files found in %s", config.csv_folder)
-        return
+        return 0
 
     succeeded = 0
     failed = 0
     total_rows = 0
     start_all = time.time()
+    seen_tables = {}
 
     for path in csv_files:
         filename = os.path.basename(path)
+        table_name = table_name_from_filename(filename)
+        if table_name.lower() in seen_tables:
+            failed += 1
+            logger.error(
+                "%s: FAILED - table name '%s' collides with already-processed file %s",
+                filename, table_name, seen_tables[table_name.lower()],
+            )
+            continue
+        seen_tables[table_name.lower()] = filename
+
         start = time.time()
         try:
             table, count = process_file(conn, config.sql_schema, path)
@@ -54,6 +65,7 @@ def run(config, conn):
             )
         except Exception as exc:
             failed += 1
+            conn.rollback()
             logger.error("%s: FAILED - %s", filename, exc)
 
     logger.info("")
@@ -67,15 +79,19 @@ def run(config, conn):
     for table, row_count in summary_report(conn, config.sql_schema):
         logger.info("  %s: %d rows", table, row_count)
 
+    return failed
+
 
 def main(argv=None):
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     config = build_config(argv)
     conn = connect(config)
     try:
-        run(config, conn)
+        failed = run(config, conn)
     finally:
         conn.close()
+    if failed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
