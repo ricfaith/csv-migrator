@@ -46,7 +46,6 @@ def test_run_continues_after_one_file_fails(tmp_path, caplog, monkeypatch):
 
     monkeypatch.setattr(migrate_csv, "create_table", fake_create_table)
     monkeypatch.setattr(migrate_csv, "load_rows", lambda *a, **k: 2)
-    monkeypatch.setattr(migrate_csv, "summary_report", lambda *a, **k: [])
 
     conn = MagicMock()
     config = Config(
@@ -64,6 +63,9 @@ def test_run_continues_after_one_file_fails(tmp_path, caplog, monkeypatch):
     assert "Succeeded: 1" in caplog.text
     assert "Failed: 1" in caplog.text
     assert conn.rollback.call_count == 1
+    assert "good.csv: starting (2 rows)" in caplog.text
+    assert "  good: 2 rows" in caplog.text
+    assert "  bad:" not in caplog.text
 
 
 def test_run_skips_file_with_colliding_table_name(tmp_path, caplog, monkeypatch):
@@ -74,7 +76,6 @@ def test_run_skips_file_with_colliding_table_name(tmp_path, caplog, monkeypatch)
 
     monkeypatch.setattr(migrate_csv, "create_table", lambda *a, **k: None)
     monkeypatch.setattr(migrate_csv, "load_rows", lambda *a, **k: 1)
-    monkeypatch.setattr(migrate_csv, "summary_report", lambda *a, **k: [])
 
     conn = MagicMock()
     config = Config(

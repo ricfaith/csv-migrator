@@ -52,19 +52,3 @@ def load_rows(conn, schema, table, columns, rows, batch_size=5000):
         conn.commit()
         total += len(batch)
     return total
-
-
-def summary_report(conn, schema):
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT t.name, s.row_count
-        FROM sys.tables t
-        JOIN sys.dm_db_partition_stats s ON t.object_id = s.object_id
-        JOIN sys.schemas sc ON t.schema_id = sc.schema_id
-        WHERE s.row_count > 0 AND t.type_desc = 'USER_TABLE' AND sc.name = ?
-        ORDER BY s.row_count DESC
-        """,
-        schema,
-    )
-    return [(row[0], row[1]) for row in cursor.fetchall()]

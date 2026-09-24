@@ -6,7 +6,6 @@ from csv_migrator.db import (
     quote_identifier,
     create_table,
     load_rows,
-    summary_report,
     escape_odbc_value,
     connect,
 )
@@ -49,20 +48,6 @@ def test_load_rows_batches_and_returns_total_count():
     assert total == 3
     assert cursor.executemany.call_count == 2
     assert cursor.fast_executemany is True
-
-
-def test_summary_report_returns_table_and_row_count_pairs():
-    conn = MagicMock()
-    cursor = conn.cursor.return_value
-    cursor.fetchall.return_value = [("MyTable", 100), ("OtherTable", 5)]
-
-    result = summary_report(conn, "dbo")
-
-    assert result == [("MyTable", 100), ("OtherTable", 5)]
-    cursor.execute.assert_called_once()
-    args, _ = cursor.execute.call_args
-    assert "sys.tables" in args[0]
-    assert args[1] == "dbo"
 
 
 def test_escape_odbc_value_wraps_and_doubles_braces():

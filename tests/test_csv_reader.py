@@ -1,7 +1,7 @@
 import os
 import sys
 
-from csv_migrator.csv_reader import read_header_and_rows, validated_rows
+from csv_migrator.csv_reader import count_data_rows, read_header_and_rows, validated_rows
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -42,6 +42,11 @@ def test_validated_rows_skips_mismatched_row_count(caplog):
     assert result == [["a", "1"], ["c", "3"]]
     assert "test.csv" in caplog.text
     assert "line 3" in caplog.text
+
+
+def test_count_data_rows_excludes_header():
+    path = os.path.join(FIXTURES_DIR, "quoted_fields.csv")
+    assert count_data_rows(path) == 2
 
 
 def test_late_non_utf8_byte_falls_back_to_latin1(tmp_path):

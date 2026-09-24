@@ -5,8 +5,8 @@ import os
 import time
 
 from csv_migrator.config import build_config
-from csv_migrator.csv_reader import read_header_and_rows, validated_rows
-from csv_migrator.db import connect, create_table, load_rows, summary_report
+from csv_migrator.csv_reader import count_data_rows, read_header_and_rows, validated_rows
+from csv_migrator.db import connect, create_table, load_rows
 from csv_migrator.sanitize import dedupe_headers, table_name_from_filename
 
 logger = logging.getLogger("migrate_csv")
@@ -41,6 +41,7 @@ def run(config, conn):
     total_rows = 0
     start_all = time.time()
     seen_tables = {}
+    migrated = []
 
     for path in csv_files:
         filename = os.path.basename(path)
@@ -54,11 +55,14 @@ def run(config, conn):
             continue
         seen_tables[table_name.lower()] = filename
 
+        logger.info("%s: starting (%d rows)", filename, count_data_rows(path))
+
         start = time.time()
         try:
             table, count = process_file(conn, config.sql_schema, path)
             total_rows += count
             succeeded += 1
+            migrated.append((table, count))
             logger.info(
                 "%s: loaded %d rows into %s.%s (%.1fs)",
                 filename, count, config.sql_schema, table, time.time() - start,
@@ -76,7 +80,7 @@ def run(config, conn):
     logger.info("Total rows loaded: %d", total_rows)
     logger.info("Elapsed: %.1fs", time.time() - start_all)
 
-    for table, row_count in summary_report(conn, config.sql_schema):
+    for table, row_count in sorted(migrated, key=lambda item: item[1], reverse=True):
         logger.info("  %s: %d rows", table, row_count)
 
     return failed

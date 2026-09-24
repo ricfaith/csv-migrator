@@ -33,6 +33,15 @@ def read_header_and_rows(path):
     return f, header, reader
 
 
+def count_data_rows(path):
+    f, reader = open_csv_reader(path)
+    try:
+        next(reader, None)
+        return sum(1 for _ in reader)
+    finally:
+        f.close()
+
+
 def validated_rows(rows, expected_columns, filename):
     for line_number, row in enumerate(rows, start=2):
         if len(row) != expected_columns:
