@@ -6,7 +6,7 @@ def connect(config):
     import pyodbc
 
     conn_str = (
-        "DRIVER={ODBC Driver 18 for SQL Server};"
+        f"DRIVER={escape_odbc_value(config.sql_driver)};"
         f"SERVER={escape_odbc_value(config.sql_server)};"
         f"DATABASE={escape_odbc_value(config.sql_database)};"
         f"UID={escape_odbc_value(config.sql_user)};"
