@@ -20,8 +20,16 @@ for SQL Server").
 
 ## Configure
 
+On a Mac:
+
 ```bash
 cp migrate.env.example migrate.env
+```
+
+On Windows (Command Prompt):
+
+```bat
+copy migrate.env.example migrate.env
 ```
 
 Edit `migrate.env` with your folder/server/database/user. Leave
@@ -56,7 +64,9 @@ brew install microsoft/mssql-release/msodbcsql18
 
 ## Python setup (first time)
 
-A virtual environment is a private folder for this project's Python packages. It keeps them separate from anything else on your computer. You only create it once.
+A virtual environment is a private folder for this project's Python packages. It keeps them separate from anything else on your computer. You only create it once. Find the appropriate instructions for your operating system.
+
+### Mac
 
 Open Terminal and run these commands one at a time. Replace `/path/to/csv-migrator` with the folder where this project lives on your computer:
 
@@ -77,4 +87,31 @@ source venv/bin/activate
 python migrate_csv.py
 ```
 
-When you are finished, type `deactivate` and press Enter. That turns the environment off. Closing the Terminal window does the same thing.
+### Windows
+
+Open Command Prompt and run these commands one at a time. Replace `C:\path\to\csv-migrator` with the folder where this project lives on your computer:
+
+```bat
+cd C:\path\to\csv-migrator
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+If `python` is not recognized, use `py -m venv venv` for the second command instead.
+
+After `venv\Scripts\activate`, your prompt should start with `(venv)`. That means the environment is on. Leave that window open and continue with [Configure](#configure) and [Run](#run).
+
+In PowerShell, turn the environment on with `venv\Scripts\Activate.ps1` instead of `venv\Scripts\activate`. If PowerShell says running scripts is disabled, use Command Prompt.
+
+The next time you open Command Prompt, you do not create the environment again. Turn it back on, then run the script:
+
+```bat
+cd C:\path\to\csv-migrator
+venv\Scripts\activate
+python migrate_csv.py
+```
+
+### When you are finished
+
+On either Mac or Windows, type `deactivate` and press Enter. That turns the environment off. Closing the window does the same thing.
