@@ -6,3 +6,4 @@ venv
 .env
 migrate.env
 docs/superpowers
+input_data/

@@ -42,3 +42,12 @@ CLI flag > environment variable > `migrate.env` > default.
 ```bash
 python -m pytest
 ```
+
+## Additional Setup
+
+To work on Macs, ensure `unixodbc` and SQL Server ODBC is installed.
+
+```bash
+brew install unixodbc
+brew install microsoft/mssql-release/msodbcsql18
+```
