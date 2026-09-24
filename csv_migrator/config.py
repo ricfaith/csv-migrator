@@ -12,6 +12,7 @@ class Config:
     sql_schema: str
     sql_user: str
     sql_password: str
+    sql_driver: str = "ODBC Driver 18 for SQL Server"
 
 
 _ENV_KEY_MAP = {
@@ -20,6 +21,7 @@ _ENV_KEY_MAP = {
     "sql_database": "SQL_DATABASE",
     "sql_schema": "SQL_SCHEMA",
     "sql_user": "SQL_USER",
+    "sql_driver": "SQL_DRIVER",
 }
 
 
@@ -77,6 +79,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--database", dest="sql_database")
     parser.add_argument("--schema", dest="sql_schema")
     parser.add_argument("--user", dest="sql_user")
+    parser.add_argument("--driver", dest="sql_driver")
     return parser
 
 
@@ -100,6 +103,9 @@ def build_config(argv=None) -> Config:
         )
 
     schema = resolve_value("sql_schema", args.sql_schema, env_file_values, default="dbo")
+    driver = resolve_value(
+        "sql_driver", args.sql_driver, env_file_values, default="ODBC Driver 18 for SQL Server"
+    )
     password = resolve_password(env_file_values)
 
     return Config(
@@ -109,4 +115,5 @@ def build_config(argv=None) -> Config:
         sql_schema=schema,
         sql_user=resolved["sql_user"],
         sql_password=password,
+        sql_driver=driver,
     )
